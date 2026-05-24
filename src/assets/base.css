@@ -1,0 +1,78 @@
+/* ===== UI/UX Pro Max Design System ===== */
+/* Project: My Trip — Vibrant & Block-based */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Righteous&display=swap');
+
+:root {
+  /* Color Palette */
+  --color-primary: #16A34A;
+  --color-on-primary: #FFFFFF;
+  --color-secondary: #4ADE80;
+  --color-accent: #0D9488;
+  --color-background: #F0FDF4;
+  --color-foreground: #14532D;
+  --color-muted: #ECFDF1;
+  --color-border: #BBF7D0;
+  --color-destructive: #DC2626;
+  --color-ring: #16A34A;
+
+  /* Surfaces */
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F0FDF4;
+
+  /* Text */
+  --color-text: #1E293B;
+  --color-text-secondary: #64748B;
+  --color-text-tertiary: #94A3B8;
+
+  /* Typography */
+  --font-heading: 'Righteous', sans-serif;
+  --font-body: 'Poppins', sans-serif;
+
+  /* Spacing (4dp system) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.10);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* Sidebar Dimensions */
+  --sidebar-collapsed: 60px;
+  --sidebar-expanded: 200px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-smooth: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== Reset ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-background);
+  color: var(--color-text);
+  height: 100vh;
+  line-height: 1.5;
+  overflow: hidden;
+}
