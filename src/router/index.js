@@ -8,6 +8,7 @@ import ProfilePage from '@/pages/ProfilePage.vue'
 import EditProfilePage from '@/pages/EditProfilePage.vue'
 import SettingsPage from '@/pages/SettingsPage.vue'
 import ChangePasswordPage from '@/pages/ChangePasswordPage.vue'
+import SearchResultsPage from '@/pages/SearchResultsPage.vue'
 import PublishPage from '@/pages/PublishPage.vue'
 import AdminPage from '@/pages/AdminPage.vue'
 import ReviewPage from '@/pages/ReviewPage.vue'
@@ -58,6 +59,11 @@ const routes = [
     name: 'ChangePassword',
     component: ChangePasswordPage,
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/search',
+    name: 'Search',
+    component: SearchResultsPage,
   },
   {
     path: '/publish',

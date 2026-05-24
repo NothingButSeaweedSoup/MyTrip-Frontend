@@ -10,14 +10,10 @@ const { user } = useAuth()
 const searchQuery = ref('')
 const searchFocused = ref(false)
 
-async function handleSearch() {
-  if (searchQuery.value.trim()) {
-    try {
-      await api.get(`/search?keyword=${encodeURIComponent(searchQuery.value.trim())}&page=1&pageSize=20`)
-      // TODO: navigate to search results page
-    } catch {
-      // ignore
-    }
+function handleSearch() {
+  const q = searchQuery.value.trim()
+  if (q) {
+    router.push(`/search?q=${encodeURIComponent(q)}`)
   }
 }
 

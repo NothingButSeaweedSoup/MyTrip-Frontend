@@ -294,7 +294,7 @@ onUnmounted(() => {
         <main class="review-content">
           <div class="review-content__author">
             <div class="review-content__avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <img :src="post.authorAvatar || '/Akari.jpg'" @error="e => e.target.src = '/Akari.jpg'" />
             </div>
             <span class="review-content__author-name">{{ post.author }}</span>
           </div>
@@ -622,6 +622,7 @@ onUnmounted(() => {
 }
 
 .review-content__avatar svg { width: 26px; height: 26px; }
+.review-content__avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
 .review-content__author-name {
   font-size: 15px;

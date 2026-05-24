@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { marked } from 'marked'
 import SearchBar from '@/components/SearchBar.vue'
 import SidebarNav from '@/components/SidebarNav.vue'
@@ -8,6 +8,7 @@ import api, { BASE_URL } from '@/api'
 import { useAuth } from '@/stores/auth'
 
 const { user } = useAuth()
+const router = useRouter()
 
 const route = useRoute()
 
@@ -37,7 +38,7 @@ function flattenComments(tree) {
         body: c.content,
         time: formatTime(c.createTime),
         likes: c.likes || 0,
-        liked: false
+        liked: c.liked || false
       })
       if (c.children && c.children.length > 0) walk(c.children)
     }
@@ -61,6 +62,7 @@ const post = ref({
   title: '',
   author: '',
   authorAvatar: '',
+  authorId: null,
   time: '',
   content: '',
   tags: [],
@@ -69,8 +71,11 @@ const post = ref({
   liked: false,
   comments: 0,
   bookmarked: false,
+  status: 1,
+  rejectReason: '',
   media: [],
 })
+const notFound = ref(false)
 const comments = ref([])
 
 async function fetchPost() {
@@ -87,6 +92,7 @@ async function fetchPost() {
       title: data.title || '',
       author: data.authorName || '匿名用户',
       authorAvatar: data.authorAvatar || '',
+      authorId: data.authorId || null,
       time: formatTime(data.createTime),
       content: data.content || '',
       tags: (data.tags || []).map(t => t.name),
@@ -95,10 +101,12 @@ async function fetchPost() {
       liked: data.liked || false,
       comments: data.commentCount || 0,
       bookmarked: data.favorited || false,
+      status: data.status ?? 1,
+      rejectReason: data.rejectReason || '',
       media: images,
     }
   } catch (e) {
-    console.error('获取帖子详情失败:', e)
+    notFound.value = true
   }
 }
 
@@ -201,6 +209,45 @@ async function toggleBookmark() {
   }
 }
 
+const isAuthor = computed(() => user.value?.userId === post.value.authorId)
+const menuOpen = ref(false)
+
+function toggleMenu() { menuOpen.value = !menuOpen.value }
+function closeMenu() { menuOpen.value = false }
+function onDocClick() { menuOpen.value = false }
+
+onMounted(() => document.addEventListener('click', onDocClick))
+onUnmounted(() => document.removeEventListener('click', onDocClick))
+
+const shareTip = ref(false)
+
+async function copyShareLink() {
+  const text = `${post.value.title} - 我的旅行\n${window.location.href}`
+  try {
+    await navigator.clipboard.writeText(text)
+    shareTip.value = true
+    setTimeout(() => { shareTip.value = false }, 2000)
+  } catch {
+    // fallback
+    const ta = document.createElement('textarea')
+    ta.value = text
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+  }
+}
+
+async function deletePost() {
+  if (!confirm('确定删除这篇帖子吗？')) return
+  try {
+    await api.delete(`/post/${post.value.id}`)
+    router.push('/')
+  } catch (e) {
+    console.error('删除失败:', e)
+  }
+}
+
 const newComment = ref('')
 
 async function submitComment() {
@@ -240,9 +287,19 @@ onUnmounted(stopAutoScroll)
 </script>
 
 <template>
-  <div class="detail-page">
-    <SearchBar :show-diff-toggle="false" />
-    <SidebarNav />
+  <SearchBar :show-diff-toggle="false" />
+  <SidebarNav />
+  <div v-if="notFound" class="detail-page">
+    <div class="detail-not-found">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <h2>帖子暂时不可查看</h2>
+      <p>该帖子正在审核中，或已被删除</p>
+      <button class="detail-not-found__btn" @click="router.push('/')">返回首页</button>
+    </div>
+  </div>
+  <div v-else class="detail-page">
     <div class="detail-container">
       <!-- ===== Left: Media panel ===== -->
       <aside class="detail-media">
@@ -314,8 +371,24 @@ onUnmounted(stopAutoScroll)
             <img :src="post.authorAvatar || '/Akari.jpg'" @error="e => e.target.src = '/Akari.jpg'" />
           </div>
           <span class="detail-content__author-name">{{ post.author }}</span>
+          <div v-if="isAuthor" class="detail-content__menu">
+            <button class="detail-content__menu-btn" @click.stop="toggleMenu">
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+            </button>
+            <div v-if="menuOpen" class="detail-content__menu-dropdown" @click.stop>
+              <button @click="deletePost(); closeMenu()">删除帖子</button>
+            </div>
+          </div>
         </div>
 
+        <div v-if="post.status !== 1" class="detail-content__banner" :class="{ 'detail-content__banner--rejected': post.status === 2 }">
+          <template v-if="post.status === 0">正在审核中，审核通过后将公开展示...</template>
+          <template v-else-if="post.status === 2">
+            审核未通过
+            <span v-if="post.rejectReason" class="detail-content__banner-reason">原因：{{ post.rejectReason }}</span>
+          </template>
+          <template v-else>仅自己可见</template>
+        </div>
         <h1 class="detail-content__title">{{ post.title }}</h1>
         <div class="detail-content__meta">
           <span class="detail-content__time">{{ post.time }}</span>
@@ -351,15 +424,18 @@ onUnmounted(stopAutoScroll)
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
             </svg>
           </button>
-          <button class="detail-actions__btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18" cy="5" r="3"/>
-              <circle cx="6" cy="12" r="3"/>
-              <circle cx="18" cy="19" r="3"/>
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-            </svg>
-          </button>
+          <div class="detail-actions__share" style="position:relative">
+            <button class="detail-actions__btn" @click="copyShareLink">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"/>
+                <circle cx="6" cy="12" r="3"/>
+                <circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+            </button>
+            <span v-if="shareTip" class="detail-actions__share-tip">已复制</span>
+          </div>
         </div>
       </main>
     </div>
@@ -432,6 +508,51 @@ onUnmounted(stopAutoScroll)
   width: calc(100vw - var(--sidebar-collapsed));
   margin-top: 76px;
   height: calc(100vh - 76px);
+}
+
+.detail-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.detail-not-found svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+}
+
+.detail-not-found h2 {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  color: var(--color-foreground);
+}
+
+.detail-not-found p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+.detail-not-found__btn {
+  padding: 10px 24px;
+  border-radius: 22px;
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.detail-not-found__btn:hover {
+  background: var(--color-foreground);
 }
 
 .detail-container {
@@ -644,6 +765,91 @@ onUnmounted(stopAutoScroll)
   flex: 1;
 }
 
+.detail-content__banner {
+  padding: 10px 16px;
+  background: #FEF3C7;
+  border: 1px solid #FCD34D;
+  border-radius: 10px;
+  color: #92400E;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.detail-content__banner--rejected {
+  background: #FEE2E2;
+  border-color: #FECACA;
+  color: #991B1B;
+}
+
+.detail-content__banner-reason {
+  display: block;
+  margin-top: 4px;
+  color: #B91C1C;
+}
+
+.detail-content__menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.detail-content__menu-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.detail-content__menu-btn:hover {
+  background: var(--color-muted);
+  color: var(--color-text);
+}
+
+.detail-content__menu-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.detail-content__menu-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  z-index: 20;
+  min-width: 120px;
+}
+
+.detail-content__menu-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-family: var(--font-body);
+  color: var(--color-destructive);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast);
+}
+
+.detail-content__menu-dropdown button:hover {
+  background: var(--color-muted);
+}
+
 .detail-content__title {
   font-family: var(--font-heading);
   font-size: 26px;
@@ -737,6 +943,20 @@ onUnmounted(stopAutoScroll)
 
 .detail-actions__btn--active:hover {
   color: var(--color-primary);
+}
+
+.detail-actions__share-tip {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-foreground);
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .detail-actions__views {
