@@ -13,6 +13,7 @@ const navItems = computed(() => {
       { id: 'home', label: '推荐', icon: 'home', path: '/' },
       { id: 'profile', label: '个人', icon: 'user', path: '/profile' },
       { id: 'favorite', label: '收藏', icon: 'star', path: '/favorites' },
+      { id: 'trip', label: '行程', icon: 'map', path: '/trip' },
       { id: 'publish', label: '发布', icon: 'upload', path: '/publish' },
     ]
     if (user.value?.role === 9) {
@@ -37,6 +38,7 @@ const activeItem = computed(() => {
   if (route.path === '/login') return 'login'
   if (route.path === '/profile') return 'profile'
   if (route.path === '/favorites') return 'favorite'
+  if (route.path === '/trip') return 'trip'
   if (route.path === '/settings') return 'settings'
   if (route.path === '/publish') return 'publish'
   if (route.path === '/admin') return 'admin'
@@ -88,6 +90,12 @@ const handleNavClick = (item) => {
           <!-- Star icon -->
           <svg v-else-if="item.icon === 'star'" class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          <!-- Map icon -->
+          <svg v-else-if="item.icon === 'map'" class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+            <line x1="8" y1="2" x2="8" y2="18"/>
+            <line x1="16" y1="6" x2="16" y2="22"/>
           </svg>
           <!-- Upload icon -->
           <svg v-else-if="item.icon === 'upload'" class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

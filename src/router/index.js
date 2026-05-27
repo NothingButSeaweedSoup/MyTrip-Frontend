@@ -12,6 +12,7 @@ import SearchResultsPage from '@/pages/SearchResultsPage.vue'
 import PublishPage from '@/pages/PublishPage.vue'
 import AdminPage from '@/pages/AdminPage.vue'
 import ReviewPage from '@/pages/ReviewPage.vue'
+import TripPlanPage from '@/pages/TripPlanPage.vue'
 import { useAuth } from '@/stores/auth'
 
 const routes = [
@@ -88,6 +89,12 @@ const routes = [
     name: 'Review',
     component: ReviewPage,
     meta: { requiresReviewer: true },
+  },
+  {
+    path: '/trip',
+    name: 'TripPlan',
+    component: TripPlanPage,
+    meta: { requiresAuth: true },
   },
 ]
 
