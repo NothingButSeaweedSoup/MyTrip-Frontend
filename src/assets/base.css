@@ -26,8 +26,8 @@
   --color-text-tertiary: #94A3B8;
 
   /* Typography */
-  --font-heading: 'Righteous', sans-serif;
-  --font-body: 'Poppins', sans-serif;
+  --font-heading: 'SimHei', 'Heiti SC', '黑体', sans-serif;
+  --font-body: 'SimHei', 'Heiti SC', '黑体', sans-serif;
 
   /* Spacing (4dp system) */
   --space-xs: 4px;

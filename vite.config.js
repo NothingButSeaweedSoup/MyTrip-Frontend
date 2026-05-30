@@ -1,5 +1,4 @@
 import { fileURLToPath, URL } from 'node:url'
-
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
@@ -23,5 +22,12 @@ export default defineConfig({
         changeOrigin: true
       }
     }
-  }
+  },
+  build: {
+    target: 'es2020',
+    minify: 'oxc',
+    sourcemap: false,
+    reportCompressedSize: false,
+    chunkSizeWarningLimit: 200,
+  },
 })

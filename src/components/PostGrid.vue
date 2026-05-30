@@ -4,48 +4,8 @@ import PostCard from './PostCard.vue'
 import api, { BASE_URL } from '@/api'
 
 const BATCH_SIZE = 30
-const RECOMMEND_CACHE_KEY = 'feed_cache'
-const CACHE_DURATION = 2 * 60 * 60 * 1000
-
-function getCachedFeed() {
-  try {
-    const raw = localStorage.getItem(RECOMMEND_CACHE_KEY)
-    if (!raw) return null
-    const cache = JSON.parse(raw)
-    if (Date.now() - cache.timestamp > CACHE_DURATION) {
-      localStorage.removeItem(RECOMMEND_CACHE_KEY)
-      return null
-    }
-    // 兜底：缓存条目超过 BATCH_SIZE 说明是旧脏数据，清除
-    if (cache.postIds && cache.postIds.length > BATCH_SIZE) {
-      localStorage.removeItem(RECOMMEND_CACHE_KEY)
-      return null
-    }
-    return cache
-  } catch {
-    localStorage.removeItem(RECOMMEND_CACHE_KEY)
-    return null
-  }
-}
-
-function setCachedFeed(postIds) {
-  localStorage.setItem(RECOMMEND_CACHE_KEY, JSON.stringify({
-    postIds,
-    timestamp: Date.now()
-  }))
-}
-
-function clearCachedFeed() {
-  localStorage.removeItem(RECOMMEND_CACHE_KEY)
-}
 
 const loading = ref(false)
-const currentPage = ref(0)
-const totalPages = ref(0)
-const batchLabel = computed(() => {
-  if (totalPages.value <= 1) return ''
-  return `第 ${currentPage.value} / ${totalPages.value} 批`
-})
 
 const MOCK_POSTS = [
   { id: 1, title: '大理洱海边的日出，治愈了我所有的疲惫', author: '旅行者小陈', likes: 2391, views: 12800, time: '3小时前', image: 'https://picsum.photos/seed/trip1/400/500', height: 320 },
@@ -121,43 +81,18 @@ function applyMock() {
   applyPosts([...MOCK_POSTS])
 }
 
-async function fetchFeed(page = 1) {
+async function fetchFeed() {
   loading.value = true
   try {
-    let data
-    if (page === 1) {
-      const cache = getCachedFeed()
-      if (cache && cache.postIds && cache.postIds.length > 0) {
-        try {
-          const posts = await api.get(`/post/by-ids?ids=${cache.postIds.join(',')}`)
-          if (posts && posts.length > 0) {
-            applyPosts(posts.map(mapPost))
-            currentPage.value = 1
-            totalPages.value = 1
-            loading.value = false
-            return
-          }
-        } catch { /* cache miss, fall through to fresh fetch */ }
-        clearCachedFeed()
-      }
-    }
-
-    data = await api.get(`/recommend/feed?page=${page}&pageSize=${BATCH_SIZE}`)
+    const data = await api.get(`/recommend/feed?page=1&pageSize=${BATCH_SIZE}`)
     if (data.records && data.records.length > 0) {
       applyPosts(data.records.map(mapPost))
-      currentPage.value = Number(data.current) || page
-      totalPages.value = Number(data.pages) || 1
-      if (page === 1) {
-        setCachedFeed(data.records.map(p => p.postId))
-      }
     } else {
       applyMock()
-      totalPages.value = 1
     }
   } catch (e) {
     console.error('推荐接口请求失败:', e)
     applyMock()
-    totalPages.value = 1
   } finally {
     loading.value = false
   }
@@ -165,12 +100,7 @@ async function fetchFeed(page = 1) {
 
 async function nextBatch() {
   if (loading.value) return
-  let nextPage = currentPage.value + 1
-  if (nextPage > totalPages.value || totalPages.value <= 1) {
-    nextPage = 1
-    clearCachedFeed()
-  }
-  await fetchFeed(nextPage)
+  await fetchFeed()
 }
 
 const posts = ref([])
@@ -360,7 +290,6 @@ onUnmounted(() => {
       </div>
     </div>
     <div class="batch-sidebar">
-      <span class="batch-label">{{ batchLabel }}</span>
       <button
         class="refresh-btn"
         :class="{ loading: loading }"
@@ -417,13 +346,6 @@ onUnmounted(() => {
   gap: 16px;
   padding: 0 16px;
   flex-shrink: 0;
-}
-
-.batch-label {
-  font-size: 13px;
-  color: var(--text-secondary, #999);
-  writing-mode: vertical-rl;
-  white-space: nowrap;
 }
 
 .refresh-btn {

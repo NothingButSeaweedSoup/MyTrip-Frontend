@@ -1,99 +1,85 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomePage from '@/pages/HomePage.vue'
-import LoginPage from '@/pages/LoginPage.vue'
-import RegisterPage from '@/pages/RegisterPage.vue'
-import PostDetailPage from '@/pages/PostDetailPage.vue'
-import FavoritesPage from '@/pages/FavoritesPage.vue'
-import ProfilePage from '@/pages/ProfilePage.vue'
-import EditProfilePage from '@/pages/EditProfilePage.vue'
-import SettingsPage from '@/pages/SettingsPage.vue'
-import ChangePasswordPage from '@/pages/ChangePasswordPage.vue'
-import SearchResultsPage from '@/pages/SearchResultsPage.vue'
-import PublishPage from '@/pages/PublishPage.vue'
-import AdminPage from '@/pages/AdminPage.vue'
-import ReviewPage from '@/pages/ReviewPage.vue'
-import TripPlanPage from '@/pages/TripPlanPage.vue'
 import { useAuth } from '@/stores/auth'
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: HomePage,
+    component: () => import('@/pages/HomePage.vue'),
   },
   {
     path: '/login',
     name: 'Login',
-    component: LoginPage,
+    component: () => import('@/pages/LoginPage.vue'),
   },
   {
     path: '/register',
     name: 'Register',
-    component: RegisterPage,
+    component: () => import('@/pages/RegisterPage.vue'),
   },
   {
     path: '/favorites',
     name: 'Favorites',
-    component: FavoritesPage,
+    component: () => import('@/pages/FavoritesPage.vue'),
     meta: { requiresAuth: true },
   },
   {
     path: '/profile',
     name: 'Profile',
-    component: ProfilePage,
+    component: () => import('@/pages/ProfilePage.vue'),
     meta: { requiresAuth: true },
   },
   {
     path: '/profile/edit',
     name: 'EditProfile',
-    component: EditProfilePage,
+    component: () => import('@/pages/EditProfilePage.vue'),
     meta: { requiresAuth: true },
   },
   {
     path: '/settings',
     name: 'Settings',
-    component: SettingsPage,
+    component: () => import('@/pages/SettingsPage.vue'),
     meta: { requiresAuth: true },
   },
   {
     path: '/settings/password',
     name: 'ChangePassword',
-    component: ChangePasswordPage,
+    component: () => import('@/pages/ChangePasswordPage.vue'),
     meta: { requiresAuth: true },
   },
   {
     path: '/search',
     name: 'Search',
-    component: SearchResultsPage,
+    component: () => import('@/pages/SearchResultsPage.vue'),
   },
   {
     path: '/publish',
     name: 'Publish',
-    component: PublishPage,
+    component: () => import('@/pages/PublishPage.vue'),
     meta: { requiresAuth: true },
   },
   {
     path: '/post/:id',
     name: 'PostDetail',
-    component: PostDetailPage,
+    component: () => import('@/pages/PostDetailPage.vue'),
     meta: { requiresAuth: true },
   },
   {
     path: '/admin',
     name: 'Admin',
-    component: AdminPage,
+    component: () => import('@/pages/AdminPage.vue'),
     meta: { requiresAdmin: true },
   },
   {
     path: '/review',
     name: 'Review',
-    component: ReviewPage,
+    component: () => import('@/pages/ReviewPage.vue'),
     meta: { requiresReviewer: true },
   },
   {
     path: '/trip',
     name: 'TripPlan',
-    component: TripPlanPage,
+    component: () => import('@/pages/TripPlanPage.vue'),
     meta: { requiresAuth: true },
   },
 ]

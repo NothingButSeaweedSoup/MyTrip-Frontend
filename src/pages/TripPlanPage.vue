@@ -26,6 +26,8 @@ const hasPlan = ref(false)
 const currentPlan = ref(null)
 const planTab = ref('map')
 const loading = ref(false)
+const loadingText = ref('思考中…')
+let loadingTimer = null
 const sessionCollapsed = ref(false)
 const mapCollapsed = ref(false)
 window._AMapSecurityConfig = { securityJsCode: import.meta.env.VITE_AMAP_SECRET }
@@ -105,12 +107,15 @@ async function sendMessage() {
   localMessages.value[sid].push({ role: 'user', text })
   messageInput.value = ''
   loading.value = true
+  loadingText.value = '思考中…'
+  loadingTimer = setTimeout(() => {
+    loadingText.value = 'AI 正在生成行程计划，预计需要较长时间，请耐心等待…'
+  }, 8000)
   nextTick(() => scrollToBottom())
 
   try {
     const resp = await api.post(`/trip-session/${sid}/chat`, { message: text })
 
-    // 全量刷新消息（含 tool 调用记录）
     if (resp.messages && resp.messages.length > 0) {
       localMessages.value[sid] = resp.messages
         .filter(m => m.role !== 'system')
@@ -136,6 +141,7 @@ async function sendMessage() {
   } catch (e) {
     localMessages.value[sid].push({ role: 'ai', text: '请求失败: ' + e.message })
   }
+  clearTimeout(loadingTimer)
   loading.value = false
   nextTick(() => scrollToBottom())
 }
@@ -147,7 +153,6 @@ function requestGeolocation(sid) {
       const locMsg = `我的当前位置: lat=${pos.coords.latitude}, lng=${pos.coords.longitude}`
       localMessages.value[sid].push({ role: 'user', text: locMsg })
       nextTick(() => scrollToBottom())
-      // 自动再发一次带位置的 chat
       try {
         const resp = await api.post(`/trip-session/${sid}/chat`, { message: locMsg })
         localMessages.value[sid].push({ role: 'ai', text: resp.reply })
@@ -386,7 +391,7 @@ function formatTime(ts) {
                   <span class="msg-sender">AI 规划师</span>
                   <div class="msg-bubble msg-thinking">
                     <span class="spinner"></span>
-                    <span>思考中…</span>
+                    <span>{{ loadingText }}</span>
                   </div>
                 </div>
               </div>
