@@ -11,6 +11,7 @@ import ConfigTab from '@/pages/admin/ConfigTab.vue'
 import AuditTab from '@/pages/admin/AuditTab.vue'
 import SensitiveWordsTab from '@/pages/admin/SensitiveWordsTab.vue'
 import ModelConfigTab from '@/pages/admin/ModelConfigTab.vue'
+import AdminEmailTab from '@/pages/admin/AdminEmailTab.vue'
 
 const router = useRouter()
 
@@ -25,6 +26,7 @@ const tabs = [
   { id: 'sensitive', label: '敏感词', icon: 'sensitive' },
   { id: 'model-config', label: '模型配置', icon: 'model' },
   { id: 'audit', label: '审核记录', icon: 'audit' },
+  { id: 'email', label: '审核邮件', icon: 'email' },
 ]
 
 function switchTab(tabId) {
@@ -68,6 +70,7 @@ function switchTab(tabId) {
       <SensitiveWordsTab v-else-if="activeTab === 'sensitive'" />
       <ModelConfigTab v-else-if="activeTab === 'model-config'" />
       <AuditTab v-else-if="activeTab === 'audit'" />
+      <AdminEmailTab v-else-if="activeTab === 'email'" />
     </div>
   </div>
 </template>

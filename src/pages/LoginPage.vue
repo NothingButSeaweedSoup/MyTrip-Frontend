@@ -114,15 +114,7 @@ const handleSubmit = async () => {
           </div>
         </div>
 
-        <div class="auth-form__options">
-          <label class="auth-form__remember">
-            <input type="checkbox" />
-            <span>记住我</span>
-          </label>
-          <a href="#" class="auth-form__forgot">忘记密码？</a>
-        </div>
-
-        <p v-if="errorMsg" class="auth-form__error">{{ errorMsg }}</p>
+<p v-if="errorMsg" class="auth-form__error">{{ errorMsg }}</p>
 
         <button type="submit" class="auth-form__submit" :disabled="submitting">
           <span v-if="submitting">登录中...</span>
@@ -339,40 +331,6 @@ const handleSubmit = async () => {
 .auth-form__toggle-pw svg {
   width: 20px;
   height: 20px;
-}
-
-.auth-form__options {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-}
-
-.auth-form__remember {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  user-select: none;
-}
-
-.auth-form__remember input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-primary);
-  cursor: pointer;
-}
-
-.auth-form__forgot {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color var(--transition-fast);
-}
-
-.auth-form__forgot:hover {
-  color: var(--color-foreground);
 }
 
 /* ===== Submit button ===== */

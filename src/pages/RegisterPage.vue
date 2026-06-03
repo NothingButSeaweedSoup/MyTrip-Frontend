@@ -181,13 +181,6 @@ const handleSubmit = async () => {
           </div>
         </div>
 
-        <div class="auth-form__terms">
-          <label class="auth-form__checkbox-label">
-            <input type="checkbox" />
-            <span>我同意 <a href="#">服务条款</a> 和 <a href="#">隐私政策</a></span>
-          </label>
-        </div>
-
         <p v-if="errorMsg" class="auth-form__error">{{ errorMsg }}</p>
 
         <button type="submit" class="auth-form__submit" :disabled="submitting">
@@ -418,40 +411,6 @@ const handleSubmit = async () => {
 .auth-form__toggle-pw svg {
   width: 18px;
   height: 18px;
-}
-
-/* ===== Terms checkbox ===== */
-.auth-form__terms {
-  font-size: 13px;
-}
-
-.auth-form__checkbox-label {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  user-select: none;
-  line-height: 1.4;
-}
-
-.auth-form__checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-primary);
-  cursor: pointer;
-  margin-top: 2px;
-  flex-shrink: 0;
-}
-
-.auth-form__checkbox-label a {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.auth-form__checkbox-label a:hover {
-  color: var(--color-foreground);
 }
 
 /* ===== Submit button ===== */
