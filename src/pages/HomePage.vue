@@ -28,8 +28,6 @@ watch(diffScrollEnabled, (val) => {
   overflow: hidden;
   display: flex;
   justify-content: center;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 40px), transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, black 80px, black calc(100% - 40px), transparent 100%);
 }
 
 @media (max-width: 768px) {

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/stores/auth'
 import SidebarNav from '@/components/SidebarNav.vue'
@@ -10,7 +10,9 @@ const router = useRouter()
 const { user, fetchUser } = useAuth()
 
 const allTags = ref([])
-const avatarPreview = ref('')
+const tagSearchKeyword = ref('')
+const searchResults = ref(null)
+let searchTimer = null
 const uploading = ref(false)
 const form = ref({
   avatar: '',
@@ -155,6 +157,22 @@ function cancelCrop() {
   cropSrc.value = ''
 }
 
+function onTagSearch() {
+  clearTimeout(searchTimer)
+  const kw = tagSearchKeyword.value.trim()
+  if (!kw) {
+    searchResults.value = null
+    return
+  }
+  searchTimer = setTimeout(async () => {
+    try {
+      searchResults.value = await api.get(`/tag/search?q=${encodeURIComponent(kw)}`)
+    } catch { searchResults.value = [] }
+  }, 300)
+}
+
+const displayTags = computed(() => searchResults.value !== null ? searchResults.value : allTags.value)
+
 function toggleTag(tagId) {
   const idx = form.value.preferredTags.indexOf(tagId)
   if (idx >= 0) {
@@ -234,9 +252,16 @@ const budgetOptions = [
 
       <div class="edit-field">
         <label class="edit-label">偏好标签</label>
-        <div v-if="allTags.length > 0" class="edit-tags">
+        <input
+          v-model="tagSearchKeyword"
+          type="text"
+          class="edit-input"
+          placeholder="搜索标签..."
+          @input="onTagSearch"
+        />
+        <div v-if="displayTags.length > 0" class="edit-tags">
           <button
-            v-for="tag in allTags"
+            v-for="tag in displayTags"
             :key="tag.tagId"
             type="button"
             class="edit-tag"

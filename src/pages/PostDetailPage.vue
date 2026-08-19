@@ -1,7 +1,9 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { marked } from 'marked'
+import { Marked } from 'marked'
+
+const md = new Marked({ gfm: true, breaks: true })
 import SearchBar from '@/components/SearchBar.vue'
 import SidebarNav from '@/components/SidebarNav.vue'
 import api, { BASE_URL } from '@/api'
@@ -197,7 +199,7 @@ function onMediaImageLoad(e) {
 }
 
 // ===== Markdown =====
-const renderedContent = computed(() => marked(post.value.content))
+const renderedContent = computed(() => md.parse(post.value.content))
 
 async function toggleBookmark() {
   const action = post.value.bookmarked ? 'unfavorite' : 'favorite'
@@ -209,7 +211,7 @@ async function toggleBookmark() {
   }
 }
 
-const isAuthor = computed(() => user.value?.userId === post.value.authorId)
+const isAuthor = computed(() => user.value?.userId === post.value.authorId || user.value?.role === 9)
 const menuOpen = ref(false)
 
 function toggleMenu() { menuOpen.value = !menuOpen.value }
@@ -434,7 +436,7 @@ onUnmounted(stopAutoScroll)
                 <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
               </svg>
             </button>
-            <span v-if="shareTip" class="detail-actions__share-tip">已复制</span>
+            <span v-if="shareTip" class="detail-actions__share-tip">链接已复制至剪切板</span>
           </div>
         </div>
       </main>
@@ -905,6 +907,29 @@ onUnmounted(stopAutoScroll)
 .detail-content__body :deep(a) {
   color: var(--color-primary);
   text-decoration: none;
+}
+
+.detail-content__body :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 0.9em;
+}
+
+.detail-content__body :deep(th),
+.detail-content__body :deep(td) {
+  border: 1px solid var(--color-border);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.detail-content__body :deep(th) {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.detail-content__body :deep(tr:nth-child(even)) {
+  background: #fafafa;
 }
 
 /* ===== Action buttons ===== */

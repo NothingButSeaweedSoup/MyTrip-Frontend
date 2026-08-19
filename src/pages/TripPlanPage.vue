@@ -446,7 +446,7 @@ function formatTime(ts) {
                 <span>地图加载中…</span>
               </div>
 
-              <div v-show="planTab === 'itinerary'" class="itinerary-panel">
+              <div v-if="planTab === 'itinerary'" class="itinerary-panel">
                 <div v-for="day in (currentPlan?.itinerary || [])" :key="day.day" class="itinerary-day">
                   <div class="itinerary-day-header">
                     <span class="itinerary-day-badge">第 {{ day.day }} 天</span>
@@ -595,7 +595,7 @@ function formatTime(ts) {
 .map-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--color-text-tertiary); font-size: 14px; background: var(--color-surface); z-index: 2; }
 
 /* 行程详情面板 */
-.itinerary-panel { position: absolute; inset: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.itinerary-panel { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
 .itinerary-day { background: var(--color-background); border-radius: 12px; border: 1px solid var(--color-border); overflow: hidden; }
 .itinerary-day-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
 .itinerary-day-badge { font-size: 14px; font-weight: 600; color: var(--color-primary); }
